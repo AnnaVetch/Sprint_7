@@ -1,8 +1,9 @@
-import allure
+import json
+
 import pytest
-import requests
+
 import helpers
-from helpers import create_random_courier
+from helpers import *
 from urls import Urls
 
 
@@ -11,25 +12,18 @@ class TestCourierLogin:
 
     @allure.title("Тест- курьер может авторизоваться, успешный запрос возвращает id")
     def test_login_success(self):
-        courier_data = {
-            'login': helpers.create_random_login(),
-            'password': helpers.create_random_password(),
-            'firstName': helpers.create_random_firstname()
-        }
+        data = create_random_courier()
 
-        with allure.step('Создание курьера'):
-            create_response = requests.post(Urls.URL_create_courier, data=courier_data)
-            assert create_response.status_code == 201
-
+        data={
+                'login': data['login'],
+                'password': data['password']}
         with allure.step('Авторизация курьера для получения id'):
-            login_response = requests.post(Urls.URL_login_courier, data={
-                'login': courier_data['login'],
-                'password': courier_data['password']
-            })
+            login_response = requests.post(Urls.URL_login_courier, json.dumps(data), headers=headers)
 
             assert login_response.status_code == 200
             assert login_response.json()["id"] >0
 
+        delete_courier(data)
 
     @pytest.mark.parametrize("login, password", [
         (helpers.create_random_login(), ""),
@@ -39,27 +33,27 @@ class TestCourierLogin:
     @allure.title("Тест-попытка авторизации с пропуском одного из обязательных полей")
     def test_login_missing_field(self, login, password):
         data = {"login": login, "password": password}
-        response = requests.post(Urls.URL_login_courier, json=data)
+        response = requests.post(Urls.URL_login_courier, json.dumps(data), headers=headers)
 
         assert response.status_code == 400
         assert response.json()["message"] == "Недостаточно данных для входа"
 
     @allure.title("Тест- авторизация курьера с неправильным логином")
     def test_login_wrong_login(self):
-        courier_data = create_random_courier()
-        courier_data.update({"login": "wrong"})
+        data = create_random_courier_data()
+        data.update({"login": "wrong"})
 
-        response = requests.post(Urls.URL_login_courier, json=courier_data)
+        response = requests.post(Urls.URL_login_courier, json.dumps(data), headers=headers)
 
         assert response.status_code == 404
         assert response.json()["message"] == "Учетная запись не найдена"
 
     @allure.title("Тест- авторизация курьера с неправильным паролем")
     def test_login_wrong_password(self):
-        courier_data = create_random_courier()
-        courier_data.update({"password": "wrong"})
+        data = create_random_courier_data()
+        data.update({"password": "wrong"})
 
-        response = requests.post(Urls.URL_login_courier, json=courier_data)
+        response = requests.post(Urls.URL_login_courier, json.dumps(data), headers=headers)
 
         assert response.status_code == 404
         assert response.json()["message"] == "Учетная запись не найдена"
@@ -71,7 +65,7 @@ class TestCourierLogin:
             "password": "wrong_password_123"
         }
 
-        response = requests.post(Urls.URL_login_courier, json=data)
+        response = requests.post(Urls.URL_login_courier, json.dumps(data), headers=headers)
 
         assert response.status_code == 404
         assert response.json()["message"] == "Учетная запись не найдена"

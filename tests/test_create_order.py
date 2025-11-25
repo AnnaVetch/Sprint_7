@@ -1,8 +1,10 @@
-import allure
+import json
+
 import pytest
-import requests
+
 from data import TestOrder
-from urls import Urls
+from helpers import *
+
 
 @allure.feature("Страница создание заказа самоката")
 class TestOrderCreate:
@@ -15,10 +17,13 @@ class TestOrderCreate:
     ])
     @allure.title("Тест- при создании заказа можно выбрать разные вариации цвета самоката")
     def test_create_order_with_different_colors(self, color):
-        payload = TestOrder().ORDER_DATA.copy()
-        payload["color"] = color
+        data = TestOrder().ORDER_DATA.copy()
+        data["color"] = color
 
-        response = requests.post(Urls.URL_create_orders, json=payload)
+        response = requests.post(Urls.URL_create_orders, json.dumps(data), headers=headers)
+        track = response.json()["track"]
 
         assert response.status_code == 201
-        assert "track" in response.json()
+        assert track > 0
+        
+        cancel_order(track)

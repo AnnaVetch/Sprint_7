@@ -7,3 +7,4 @@ class Urls:
     URL_list_orders = f'{HOST}api/v1/orders'
     URL_accept_orders = f'{HOST}api/v1/orders/accept'
     URL_get_orders = f'{HOST}api/v1/orders/track'
+    URL_cancel_order = f'{HOST}api/v1/orders/cancel'
