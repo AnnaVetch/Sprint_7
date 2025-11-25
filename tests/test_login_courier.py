@@ -1,8 +1,15 @@
+import allure
 import pytest
-from courier_helpers import *
+import requests
+import helpers
+from helpers import create_random_courier
+from urls import Urls
+
+
+@allure.feature("Страница авторизации курьера")
 class TestCourierLogin:
 
-
+    @allure.title("Тест- курьер может авторизоваться, успешный запрос возвращает id")
     def test_login_success(self):
         courier_data = {
             'login': helpers.create_random_login(),
@@ -25,8 +32,11 @@ class TestCourierLogin:
 
 
     @pytest.mark.parametrize("login, password", [
-        (helpers.create_random_login(), ""), ("", helpers.create_random_password()),
+        (helpers.create_random_login(), ""),
+        ("", helpers.create_random_password()),
+        ("",""),
     ])
+    @allure.title("Тест-попытка авторизации с пропуском одного из обязательных полей")
     def test_login_missing_field(self, login, password):
         data = {"login": login, "password": password}
         response = requests.post(Urls.URL_login_courier, json=data)
@@ -34,7 +44,7 @@ class TestCourierLogin:
         assert response.status_code == 400
         assert response.json()["message"] == "Недостаточно данных для входа"
 
-
+    @allure.title("Тест- авторизация курьера с неправильным логином")
     def test_login_wrong_login(self):
         courier_data = create_random_courier()
         courier_data.update({"login": "wrong"})
@@ -44,6 +54,7 @@ class TestCourierLogin:
         assert response.status_code == 404
         assert response.json()["message"] == "Учетная запись не найдена"
 
+    @allure.title("Тест- авторизация курьера с неправильным паролем")
     def test_login_wrong_password(self):
         courier_data = create_random_courier()
         courier_data.update({"password": "wrong"})
@@ -53,18 +64,7 @@ class TestCourierLogin:
         assert response.status_code == 404
         assert response.json()["message"] == "Учетная запись не найдена"
 
-    @pytest.mark.parametrize("data", [
-        {"password": helpers.create_random_password()},
-        {"login": helpers.create_random_login()},
-        {},
-    ])
-    def test_login_missing_field(self, data):
-        response = requests.post(Urls.URL_login_courier, json=data)
-
-        assert response.status_code == 400
-        assert response.json()["message"] == "Недостаточно данных для входа"
-
-
+    @allure.title("Тест- авторизация под несуществующим пользователем")
     def test_login_nonexistent_user(self):
         data = {
             "login": "user_does_not_exist_123",

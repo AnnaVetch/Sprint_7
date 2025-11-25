@@ -1,12 +1,11 @@
+import allure
 import pytest
 import requests
-
 from data import TestOrder
 from urls import Urls
 
-
+@allure.feature("Страница создание заказа самоката")
 class TestOrderCreate:
-
 
     @pytest.mark.parametrize("color", [
         ["BLACK"],
@@ -14,6 +13,7 @@ class TestOrderCreate:
         ["BLACK", "GREY"],
         []
     ])
+    @allure.title("Тест- при создании заказа можно выбрать разные вариации цвета самоката")
     def test_create_order_with_different_colors(self, color):
         payload = TestOrder().ORDER_DATA.copy()
         payload["color"] = color
