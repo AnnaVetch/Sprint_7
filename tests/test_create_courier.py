@@ -12,7 +12,6 @@ class TestCreateCourier:
 
         response = requests.post(Urls.URL_create_courier, json.dumps(data), headers=headers)
 
-        print(response.content.decode('utf-8'))
         assert response.status_code == 201
         assert response.json()["ok"] == True
 
