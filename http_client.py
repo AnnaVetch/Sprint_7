@@ -3,41 +3,52 @@ import requests
 
 from helpers import *
 
-from urls import Urls
 
-def create_courier(data):
-    # Создания курьера с параметрами
+class HttpClient:
+    def __init__(self, host):
+        self.url_create_courier = f'{host}api/v1/courier/'
+        self.url_login_courier = f'{host}api/v1/courier/login'
+        self.url_delete_courier = f'{host}api/v1/courier'
+        self.url_create_orders = f'{host}api/v1/orders'
+        self.url_list_orders = f'{host}api/v1/orders'
+        self.url_accept_orders = f'{host}api/v1/orders/accept'
+        self.url_get_orders = f'{host}api/v1/orders/track'
+        self.url_cancel_order = f'{host}api/v1/orders/cancel'
 
-    with allure.step('Создание курьера'):
-        response = requests.post(Urls.URL_create_courier, data)
-        assert response.status_code == 201
-        assert response.json()["ok"] == True
+    def create_courier(self, data):
+        # Создания курьера с параметрами
+        with allure.step('Создание курьера'):
+            response = requests.post(self.url_create_courier, data, headers=headers)
+            return response
 
-def create_random_courier():
-    # Создание рандомного курьера
-    data = create_random_courier_data()
-    create_courier(data)
-    return data
+    def login_courier(self, data):
+        # Авторизация курьера
+        with allure.step('Авторизация курьера для получения id'):
+            response = requests.post(self.url_login_courier, data, headers=headers)
+            return response
 
-def login_courier(courier_data):
-    # Авторизация курьера
-    with allure.step('Авторизация курьера для получения id'):
-        response = requests.post(Urls.URL_login_courier, {
-            'login': courier_data['login'],
-            'password': courier_data['password']
-        })
-        courier_id = response.json()["id"]
-    assert response.status_code == 200
-    return courier_id
+    def delete_courier_by_id(self, courier_id):
+        # Удаление курьера по идентификатору
+        with allure.step('Удаление курьера'):
+            response = requests.delete(self.url_delete_courier + "/" + str(courier_id))
+        assert response
 
-def delete_courier_by_id(courier_id):
-    # Удаление курьера по идентификатору
-    data = requests.delete(Urls.URL_delete_courier+"/"+str(courier_id))
-    assert data.status_code == 200
+    def crate_order(self, data):
+        # Создание заказа
+        with allure.step('Создание заказа'):
+            response = requests.post(self.url_create_orders, data, headers=headers)
 
-def crate_order(courier_id):
-    response = requests.post(Urls.URL_create_orders, json.dumps(data), headers=headers)
-    track = response.json()["track"]
+        return response
 
-    assert response.status_code == 201
-    assert track > 0
+    def get_list_orders(self):
+        # Получение заказа
+        with allure.step('Получение заказа'):
+            response = requests.get(self.url_list_orders, headers=headers)
+
+        return response
+
+    def cancel_order(self, data):
+        # Отмена заказа
+        with allure.step('Отмена заказа'):
+            response = requests.put(self.url_cancel_order, data)
+        return response
