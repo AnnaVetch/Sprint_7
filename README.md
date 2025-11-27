@@ -37,7 +37,7 @@
 3. Сгенерировать Allure-отчёт:
 
    ```bash
-   pytest --alluredir=allure-results
+   pytest --alluredir=allure_results
 
 
 ## Запуск Тестов
