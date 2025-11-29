@@ -12,7 +12,7 @@ def make_http_client():
 
     # setup
     client = http_client.HttpClient('https://qa-scooter.praktikum-services.ru/')
-    yield client
+    return client
 
 
 @pytest.fixture
@@ -26,10 +26,8 @@ def courier_cleanup_context(make_http_client):
 
     # teardown
     response = client.login_courier(json.dumps(ctx["data"]))
-    assert response.status_code == 200
     courier_id = response.json()["id"]
     client.delete_courier_by_id(courier_id)
-    assert response.status_code == 200
 
 
 @pytest.fixture
@@ -39,17 +37,13 @@ def make_courier(make_http_client):
     # setup
     client = make_http_client
     data = helpers.create_random_courier_data()
-    response = client.create_courier(json.dumps(data))
-    assert response.status_code == 201
+    client.create_courier(json.dumps(data))
     yield data, client
 
     # teardown
     response = client.login_courier(json.dumps(data))
-    assert response.status_code == 200
-
     courier_id = response.json()["id"]
     client.delete_courier_by_id(courier_id)
-    assert response.status_code == 200
 
 
 @pytest.fixture

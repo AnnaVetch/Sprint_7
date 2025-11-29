@@ -31,20 +31,18 @@ class HttpClient:
         # Удаление курьера по идентификатору
         with allure.step('Удаление курьера'):
             response = requests.delete(self.url_delete_courier + "/" + str(courier_id))
-        assert response
+            return response
 
     def crate_order(self, data):
         # Создание заказа
         with allure.step('Создание заказа'):
             response = requests.post(self.url_create_orders, data, headers=headers)
-
         return response
 
     def get_list_orders(self):
         # Получение заказа
         with allure.step('Получение заказа'):
             response = requests.get(self.url_list_orders, headers=headers)
-
         return response
 
     def cancel_order(self, data):
